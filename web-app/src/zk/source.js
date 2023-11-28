@@ -1,0 +1,1 @@
+export const source = "def main(private field a) -> field { return a * a; }";
