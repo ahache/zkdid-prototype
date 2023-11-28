@@ -1,8 +1,29 @@
-# React + Vite
+# Web App (Dapp)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+### User Stories
+As a user I would like to
+- Access the web app
+- Connect my wallet
+- View my domains (NFTs held)
+- Create a new domain
+    - Input value
+    - Generate proof
+    - Mint NFT
+    - Store proof in DWN
+- Verify a domain sent to me (stretch)
 
-Currently, two official plugins are available:
+------
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### ToDo
+- Add basic components:
+    - Wallet connection
+    - Viewing domains
+    - Creating new domain
+- Setup Third Web contract + wallet bindings
+- Add ZoKrates proof generation module
+    - Have to create Prover/Verifier first
+- Add domain NFT ABI
+- Web5 DWN setup
+    - Create Protocol
+    - Initiate connection 
+    
