@@ -5,6 +5,7 @@ import './App.css'
 import getProof from './zk/getProof';
 
 import {writeProofToDWN, getRecordFromDWN} from './web5';
+import { ConnectWallet } from '@thirdweb-dev/react';
 
 function App() {
   const [input, setInput] = useState("");
@@ -41,6 +42,7 @@ function App() {
           }} 
         />
       </div>
+      <ConnectWallet theme="light" />
     </>
   )
 }
