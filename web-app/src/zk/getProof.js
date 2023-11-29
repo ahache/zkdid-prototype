@@ -3,20 +3,24 @@ import { source } from '../zk/source.js';
 import provingKey from '../zk/provingKey';
 
 const getProof = async (input) => {
-  let proof;
+    if (input) {
+        let formattedProof;
+      
+        await initialize().then((zokratesProvider) => {
+            const artifacts = zokratesProvider.compile(source);
+            const { witness } = zokratesProvider.computeWitness(artifacts, [input]);
+        
+            const proof = zokratesProvider.generateProof(
+                artifacts.program,
+                witness,
+                provingKey
+            );
 
-  await initialize().then((zokratesProvider) => {
-    const artifacts = zokratesProvider.compile(source);
-    const { witness } = zokratesProvider.computeWitness(artifacts, [input]);
-
-    proof = zokratesProvider.generateProof(
-      artifacts.program,
-      witness,
-      provingKey
-    );
-  });
-  
-  return proof;
+            formattedProof = zokratesProvider.utils.formatProof(proof);
+        });
+      
+        return formattedProof;
+    }
 };
 
 export default getProof;
