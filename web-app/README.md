@@ -1,6 +1,12 @@
 # Web App (Dapp)
 
-### User Stories
+## How to run
+- clone project repository
+- `cd web-app`
+- `npm install`
+- `npm run dev`
+
+## User Stories
 As a user I would like to
 - Access the web app
 - Connect my wallet
@@ -14,16 +20,12 @@ As a user I would like to
 
 ------
 
-### ToDo
+## ToDo
 - Add basic components:
-    - Wallet connection
     - Viewing domains
     - Creating new domain
-- Setup Third Web contract + wallet bindings
-- Add ZoKrates proof generation module
-    - Have to create Prover/Verifier first
+- Third Web
 - Add domain NFT ABI
-- Web5 DWN setup
-    - Create Protocol
-    - Initiate connection 
+- Web5 DWN
+    - Create component to resolve shared domain 
     
