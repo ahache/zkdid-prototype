@@ -26,5 +26,5 @@ As a user I would like to
 - Third Web
     - New page for viewing / managing domains
 - Web5 DWN
-    - Create component to resolve domain 
-    
+    - Resolve domain 
+- Error handling for registry

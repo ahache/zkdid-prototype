@@ -36,6 +36,8 @@ contract ZKDID is ERC721 {
 
     IVerifier Verifier;
 
+    event DomainUpdated(string indexed domain, uint256 tokenId, string recordId);
+
     constructor(address _verifier) ERC721("ZKDID Domain Registry", "ZKDID") {
         Verifier = IVerifier(_verifier);
     }
@@ -79,6 +81,8 @@ contract ZKDID is ERC721 {
         _domainToIds[domain] = DomainIDs(_tokenIdCounter, recordId);
         _tokenIdToDomain[_tokenIdCounter] = domain;
 
+        emit DomainUpdated(domain, _tokenIdCounter, recordId);
+        
         return _tokenIdCounter;
     }
 
@@ -89,6 +93,10 @@ contract ZKDID is ERC721 {
      */
     function updateRecordId(uint256 tokenId, string memory newRecordId) public {
         require(ownerOf(tokenId) == msg.sender, "Only the token owner can update the recordId");
-        _domainToIds[_tokenIdToDomain[tokenId]].recordId = newRecordId;
+
+        string memory domain = _tokenIdToDomain[tokenId];
+        _domainToIds[domain].recordId = newRecordId;
+
+        emit DomainUpdated(domain, tokenId, newRecordId);
     }
 }

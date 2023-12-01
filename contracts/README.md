@@ -3,7 +3,7 @@
 - Resolving domain to DWN Record ID containing proof
 
 ### Addresses (Polygon Mumbai)
-- ZKDID: 0x9f38407e7cB23E2D757846A77792E4739CdbddF3
+- ZKDID: 0xD8e39bAb22EaFa09f7aeCd0BE6b22Fc7D4364a4e
 - Verifier: 0x7195eD2EF7CbA8a2e668c1219307Eb12f8D2727b
 
 ### TODO

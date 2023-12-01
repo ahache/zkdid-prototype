@@ -1,1 +1,1 @@
-export const zkdidContractAddress = "0x9f38407e7cB23E2D757846A77792E4739CdbddF3";
+export const zkdidContractAddress = "0xD8e39bAb22EaFa09f7aeCd0BE6b22Fc7D4364a4e";

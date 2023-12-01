@@ -1,17 +1,14 @@
+import './App.css'
 import { useState } from 'react';
 import styled from 'styled-components';
+import { createHash } from 'crypto';
 import { ConnectWallet } from '@thirdweb-dev/react';
+import { useContractWrite, useContract, Web3Button } from "@thirdweb-dev/react";
 import { writeProofToDWN, getRecordFromDWN } from './web5';
+import { zkdidContractAddress } from './constants/addresses';
+import zkdidContractABI from './abis/ZKDID.json';
 import getProof from './zk/getProof';
 import zkdidLogo from '/zkdid-brain.jpg'
-import './App.css'
-
-import { createHash } from 'crypto';
-
-import zkdidContractABI from './abis/ZKDID.json';
-
-import { useContractWrite, useContract, Web3Button } from "@thirdweb-dev/react";
-import { zkdidContractAddress } from './constants/addresses';
 
 function hash(string) {
     return createHash('sha256').update(string).digest('hex');
@@ -20,12 +17,44 @@ function hash(string) {
 const Container = styled.div`
     position: relative;
 
-    .entry-label {
-        font-weight: 500;
+    .input-group {
+        ${'' /* padding-bottom:  */}
+        .entry-label {
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+
+        input {
+            padding: 5px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: #ededef solid;
+        }
     }
 
     .register-button {
-        margin-top: 15px;
+        margin-top: 30px;
+    }
+
+    .results {
+        border: #ededef solid 1px;
+        width: max-content;
+        margin: auto;
+        padding: 15px;
+        margin-top: 30px;
+        border-radius: 7px;
+
+        .domain-registered {
+            .success-label {
+                font-weight: 600;
+                font-size: 1.5em;
+                padding-bottom: 10px;
+            }
+
+            .domain-string {
+                font-weight: 600;
+            }
+        }
     }
 
     .wallet-connect {
@@ -38,6 +67,8 @@ const Container = styled.div`
 function App() {
     const [input, setInput] = useState("");
     // const [recordIdInput, setRecordIdInput] = useState("");
+    const [domainString, setDomainString] = useState("");
+    const [showSuccessResults, setShowSuccessResults] = useState(false);
 
     const { contract } = useContract(
         zkdidContractAddress,
@@ -55,28 +86,48 @@ function App() {
                 <img src={zkdidLogo} className="logo" alt="logo" />
             </div>
             <h1>ZKDID</h1>
-            <div className='entry-label'>Enter a Number:</div>
-            <div>
+            <div className='input-group'>
+                <div className='entry-label'>Enter a Number:</div>
                 <div>
                     <input type="text" onChange={e => setInput(e.target.value)} />
                 </div>
+            </div>
+            <div>
                 <div className='register-button'>
                     <Web3Button
                         contractAddress={zkdidContractAddress}
                         contractAbi={zkdidContractABI}
+                        onSuccess={() => {
+                            setShowSuccessResults(true);
+                        }}
+                        onError={() => {
+                            alert("Error!");
+                        }}
                         action={async () => {
                             if (!input || isNaN(Number(input))) return;
+                            setShowSuccessResults(false);
                             const proof = await getProof(input);
                             const eccPoint = proof[0];
                             const output = proof[1];
                             const pointHash = hash(JSON.stringify(eccPoint));
+                            setDomainString(pointHash);
                             const record = await writeProofToDWN(proof);
-                            mutateAsync({ args: [pointHash, eccPoint, output, record._recordId] })
+                            const result = await mutateAsync({ args: [pointHash, eccPoint, output, record._recordId] });
+                            console.log(result);
                         }}
                     >
                         Register Domain
                     </Web3Button>
                 </div>
+                {showSuccessResults && <div className='results'>
+                    {showSuccessResults && 
+                        <div className='domain-registered'>
+                            <div className='success-label'>Successfully Registered</div>
+                            <div className='domain-string'>{domainString}.zkdid</div>
+                        </div>
+                    }
+                    {/* Error case here */}
+                </div>}
             </div>
             {/* <div>Enter Record ID:</div> */}
             {/* <div>
