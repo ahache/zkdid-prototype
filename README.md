@@ -13,7 +13,7 @@ The domain string is the sha256 hash of the stringified proof + square result
 ### Tech used
 - React (Vite)
 - Third Web for web3 connection
-- Web5 for DWN
+- TBD Web5 for DWN
 - ZoKrates for ZK proof generation and verifying
 - Foundry for smart contracts
 - Open Zeppelin for ERC721 (NFT)
