@@ -6,6 +6,17 @@ import getProof from './zk/getProof';
 import zkdidLogo from '/zkdid-brain.jpg'
 import './App.css'
 
+import { createHash } from 'crypto';
+
+import zkdidContractABI from './abis/ZKDID.json';
+
+import { useContractWrite, useContract, Web3Button } from "@thirdweb-dev/react";
+import { zkdidContractAddress } from './constants/addresses';
+
+function hash(string) {
+    return createHash('sha256').update(string).digest('hex');
+}
+
 const Container = styled.div`
     position: relative;
 
@@ -14,7 +25,7 @@ const Container = styled.div`
     }
 
     .register-button {
-        margin-top: 5px;
+        margin-top: 15px;
     }
 
     .wallet-connect {
@@ -28,15 +39,15 @@ function App() {
     const [input, setInput] = useState("");
     // const [recordIdInput, setRecordIdInput] = useState("");
 
-    const registerDomain = async () => {
-        if (!input || Number(input) == NaN) return;
-        const proof = await getProof(input);
-        console.log(proof);
-        // Need to separate out proof verify input value
-        // hash proof
-        const record = await writeProofToDWN(proof);
-        console.log(record._recordId);
-    }
+    const { contract } = useContract(
+        zkdidContractAddress,
+        zkdidContractABI,
+    );
+
+    const { mutateAsync, isLoading, error } = useContractWrite(
+        contract,
+        "registerDomain",
+    );
 
     return (
         <Container>
@@ -50,11 +61,21 @@ function App() {
                     <input type="text" onChange={e => setInput(e.target.value)} />
                 </div>
                 <div className='register-button'>
-                    <input 
-                        type="button" 
-                        value="Register Domain" 
-                        onClick={() => registerDomain()} 
-                    />
+                    <Web3Button
+                        contractAddress={zkdidContractAddress}
+                        contractAbi={zkdidContractABI}
+                        action={async () => {
+                            if (!input || isNaN(Number(input))) return;
+                            const proof = await getProof(input);
+                            const eccPoint = proof[0];
+                            const output = proof[1];
+                            const pointHash = hash(JSON.stringify(eccPoint));
+                            const record = await writeProofToDWN(proof);
+                            mutateAsync({ args: [pointHash, eccPoint, output, record._recordId] })
+                        }}
+                    >
+                        Register Domain
+                    </Web3Button>
                 </div>
             </div>
             {/* <div>Enter Record ID:</div> */}

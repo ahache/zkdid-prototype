@@ -21,11 +21,10 @@ As a user I would like to
 ------
 
 ## ToDo
-- Add basic components:
+- Add components:
     - Viewing domains
-    - Creating new domain
 - Third Web
-- Add domain NFT ABI
+    - New page for viewing / managing domains
 - Web5 DWN
-    - Create component to resolve shared domain 
+    - Create component to resolve domain 
     

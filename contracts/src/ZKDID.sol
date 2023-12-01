@@ -68,9 +68,9 @@ contract ZKDID is ERC721 {
         string memory domain, 
         IVerifier.Proof memory proof, 
         uint[1] memory input, 
-        uint256 recordId
+        string memory recordId
     ) public returns (uint256 tokenId) {
-        require(_domainToIds[domain].tokenID == 0, "Domain already registered");
+        require(_domainToIds[domain].tokenId == 0, "Domain already registered");
         require(Verifier.verifyTx(proof, input), "Invalid proof");
 
         _tokenIdCounter += 1;
