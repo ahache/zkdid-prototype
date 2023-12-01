@@ -18,7 +18,6 @@ const Container = styled.div`
     position: relative;
 
     .input-group {
-        ${'' /* padding-bottom:  */}
         .entry-label {
             font-weight: 500;
             font-size: 1.1em;
@@ -65,8 +64,7 @@ const Container = styled.div`
 `;
 
 function App() {
-    const [input, setInput] = useState("");
-    // const [recordIdInput, setRecordIdInput] = useState("");
+    const [inputNumber, setInputNumber] = useState("");
     const [domainString, setDomainString] = useState("");
     const [showSuccessResults, setShowSuccessResults] = useState(false);
 
@@ -89,7 +87,11 @@ function App() {
             <div className='input-group'>
                 <div className='entry-label'>Enter a Number:</div>
                 <div>
-                    <input type="text" onChange={e => setInput(e.target.value)} />
+                    <input 
+                        type="text" 
+                        onChange={e => setInputNumber(e.target.value)} 
+                        value={inputNumber}
+                    />
                 </div>
             </div>
             <div>
@@ -104,16 +106,17 @@ function App() {
                             alert("Error!");
                         }}
                         action={async () => {
-                            if (!input || isNaN(Number(input))) return;
+                            if (!inputNumber || isNaN(Number(inputNumber))) return;
                             setShowSuccessResults(false);
-                            const proof = await getProof(input);
-                            const eccPoint = proof[0];
-                            const output = proof[1];
-                            const pointHash = hash(JSON.stringify(eccPoint));
-                            setDomainString(pointHash);
+                            const proof = await getProof(inputNumber);
+                            const eccPoints = proof[0];
+                            const outputSquare = proof[1];
                             const record = await writeProofToDWN(proof);
-                            const result = await mutateAsync({ args: [pointHash, eccPoint, output, record._recordId] });
-                            console.log(result);
+                            const storedString = await getRecordFromDWN(record._recordId);
+                            const stringHash = hash(JSON.stringify(storedString));
+                            setDomainString(stringHash);
+                            await mutateAsync({ args: [stringHash, eccPoints, outputSquare, record._recordId] });
+                            setInputNumber("");
                         }}
                     >
                         Register Domain
@@ -129,18 +132,6 @@ function App() {
                     {/* Error case here */}
                 </div>}
             </div>
-            {/* <div>Enter Record ID:</div> */}
-            {/* <div>
-                <input type="text" onChange={e => setRecordIdInput(e.target.value)} />
-                <input 
-                    type="button" 
-                    value="Get Record" 
-                    onClick={async () => {
-                        const proof = await getRecordFromDWN(recordIdInput);
-                        console.log(proof);
-                    }} 
-                />
-            </div> */}
             <div className='wallet-connect'>
                 <ConnectWallet theme="light" />
             </div>
