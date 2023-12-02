@@ -4,15 +4,18 @@ import styled from 'styled-components';
 import { createHash } from 'crypto';
 import { ConnectWallet } from '@thirdweb-dev/react';
 import { useContractWrite, useContract, Web3Button } from "@thirdweb-dev/react";
-import { writeProofToDWN, getRecordFromDWN } from './web5';
-import { zkdidContractAddress } from './constants/addresses';
+import { writeProofToDWN, getProofFromDWN, queryProofFromDWN } from './web5';
+import { verifierContractAddress, zkdidContractAddress } from './constants/addresses';
 import zkdidContractABI from './abis/ZKDID.json';
+import verifierContractABI from './abis/Verifier.json';
 import getProof from './zk/getProof';
 import zkdidLogo from '/zkdid-brain.jpg'
 
 function hash(string) {
     return createHash('sha256').update(string).digest('hex');
 }
+
+const buttonGrey = "#ededef";
 
 const Container = styled.div`
     position: relative;
@@ -27,7 +30,11 @@ const Container = styled.div`
             padding: 5px;
             font-size: 1em;
             border-radius: 5px;
-            border: #ededef solid;
+            border: ${buttonGrey} solid;
+        }
+
+        input.domain-input {
+            width: 300px;
         }
     }
 
@@ -36,7 +43,7 @@ const Container = styled.div`
     }
 
     .results {
-        border: #ededef solid 1px;
+        border: ${buttonGrey} solid 1px;
         width: max-content;
         margin: auto;
         padding: 15px;
@@ -56,6 +63,12 @@ const Container = styled.div`
         }
     }
 
+    .divider {
+        border: 1px ${buttonGrey} solid;
+        margin: 40px auto;
+        width: 40%;
+    }
+
     .wallet-connect {
         position: absolute;
         top: 0;
@@ -65,18 +78,16 @@ const Container = styled.div`
 
 function App() {
     const [inputNumber, setInputNumber] = useState("");
-    const [domainString, setDomainString] = useState("");
-    const [showSuccessResults, setShowSuccessResults] = useState(false);
+    const [inputDomain, setInputDomain] = useState("");
+    const [domainStringRegistering, setDomainStringRegistering] = useState("");
+    const [showRegistrationResults, setShowRegistrationResults] = useState(false);
+    const [verificationStatement, setVerificationStatement] = useState("");
 
-    const { contract } = useContract(
-        zkdidContractAddress,
-        zkdidContractABI,
-    );
+    const { contract: zkdidContract } = useContract(zkdidContractAddress, zkdidContractABI);
 
-    const { mutateAsync, isLoading, error } = useContractWrite(
-        contract,
-        "registerDomain",
-    );
+    const { contract: verifierContract } = useContract(verifierContractAddress, verifierContractABI);
+
+    const { mutateAsync } = useContractWrite(zkdidContract, "registerDomain");
 
     return (
         <Container>
@@ -84,6 +95,7 @@ function App() {
                 <img src={zkdidLogo} className="logo" alt="logo" />
             </div>
             <h1>ZKDID</h1>
+            {/* Registry */}
             <div className='input-group'>
                 <div className='entry-label'>Enter a Number:</div>
                 <div>
@@ -100,36 +112,84 @@ function App() {
                         contractAddress={zkdidContractAddress}
                         contractAbi={zkdidContractABI}
                         onSuccess={() => {
-                            setShowSuccessResults(true);
+                            setShowRegistrationResults(true);
                         }}
                         onError={() => {
                             alert("Error!");
                         }}
                         action={async () => {
                             if (!inputNumber || isNaN(Number(inputNumber))) return;
-                            setShowSuccessResults(false);
+                            setShowRegistrationResults(false);
                             const proof = await getProof(inputNumber);
                             const eccPoints = proof[0];
                             const outputSquare = proof[1];
-                            const record = await writeProofToDWN(proof);
-                            const storedString = await getRecordFromDWN(record._recordId);
+                            const { record, did: ionDid } = await writeProofToDWN(proof);
+                            const storedString = await getProofFromDWN(record._recordId);
                             const stringHash = hash(JSON.stringify(storedString));
-                            setDomainString(stringHash);
-                            await mutateAsync({ args: [stringHash, eccPoints, outputSquare, record._recordId] });
+                            setDomainStringRegistering(stringHash);
+                            await mutateAsync({ args: [stringHash, eccPoints, outputSquare, ionDid, record._recordId] });
                             setInputNumber("");
                         }}
                     >
                         Register Domain
                     </Web3Button>
                 </div>
-                {showSuccessResults && <div className='results'>
-                    {showSuccessResults && 
+                {showRegistrationResults && <div className='results'>
+                    {showRegistrationResults && 
                         <div className='domain-registered'>
                             <div className='success-label'>Successfully Registered</div>
-                            <div className='domain-string'>{domainString}.zkdid</div>
+                            <div className='domain-string'>{domainStringRegistering}.zkdid</div>
                         </div>
                     }
                     {/* Error case here */}
+                </div>}
+            </div>
+            <div className='divider'></div>
+            {/* Resolution */}
+            <div className='input-group'>
+                <div className='entry-label'>Enter Domain:</div>
+                <div>
+                    <input 
+                        type="text" 
+                        className='domain-input'
+                        onChange={e => setInputDomain(e.target.value)} 
+                        value={inputDomain}
+                    />
+                </div>
+            </div>
+            <div>
+                <div className='register-button'>
+                    <Web3Button
+                        contractAddress={zkdidContractAddress}
+                        contractAbi={zkdidContractABI}
+                        onError={() => {
+                            alert("Error!");
+                        }}
+                        action={async () => {
+                            if (!inputDomain) return;
+                            const domainString = inputDomain.split('.')[0];
+                            const [, ionDid, recordId] = await zkdidContract.call("resolveAll", [domainString]);
+                            const storedString = await queryProofFromDWN(ionDid, recordId);
+                            const proof = JSON.parse(storedString);
+                            const eccPoints = proof[0];
+                            const outputSquare = proof[1];
+                            const verifierResult = await verifierContract.call("verifyTx", [eccPoints, outputSquare]);
+                            if (verifierResult) {
+                                setVerificationStatement(`Owner must know the root of ${parseInt(outputSquare[0], 16)}`);
+                            } else {
+                                console.log("Proof can not be verified");
+                            }
+                        }}
+                    >
+                        Resolve
+                    </Web3Button>
+                </div>
+                {verificationStatement && <div className='results'>
+                    {verificationStatement && 
+                        <div className='domain-registered'>
+                            <div className='domain-string'>{verificationStatement}</div>
+                        </div>
+                    }
                 </div>}
             </div>
             <div className='wallet-connect'>

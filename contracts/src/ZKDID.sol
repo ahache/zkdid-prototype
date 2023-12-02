@@ -25,18 +25,19 @@ interface IVerifier {
 
 /// @title ZKDID Domain Registry and Resolution
 contract ZKDID is ERC721 {
-    struct DomainIDs {
+    struct DomainInfo {
         uint256 tokenId;
+        string ionDid;
         string recordId;
     }
 
     uint256 private _tokenIdCounter;
-    mapping (string => DomainIDs) private _domainToIds;
+    mapping (string => DomainInfo) private _domainToIds;
     mapping (uint256 => string) private _tokenIdToDomain;
 
     IVerifier Verifier;
 
-    event DomainUpdated(string indexed domain, uint256 tokenId, string recordId);
+    event DomainCreated(string indexed domain, uint256 tokenId, string ionDid, string recordId);
 
     constructor(address _verifier) ERC721("ZKDID Domain Registry", "ZKDID") {
         Verifier = IVerifier(_verifier);
@@ -50,11 +51,19 @@ contract ZKDID is ERC721 {
         return _tokenIdToDomain[tokenId];
     }
 
-    function resolveTokenId(string memory domain) public view returns (uint256) {
+    function resolveAll(string memory domain) external view returns (DomainInfo memory) {
+        return _domainToIds[domain];
+    }
+
+    function resolveTokenId(string memory domain) external view returns (uint256) {
         return _domainToIds[domain].tokenId;
     }
 
-    function resolveRecordId(string memory domain) public view returns (string memory) {
+    function resolveIonDid(string memory domain) external view returns (string memory) {
+        return _domainToIds[domain].ionDid;
+    }
+
+    function resolveRecordId(string memory domain) external view returns (string memory) {
         return _domainToIds[domain].recordId;
     }
 
@@ -70,33 +79,21 @@ contract ZKDID is ERC721 {
         string memory domain, 
         IVerifier.Proof memory proof, 
         uint[1] memory input, 
+        string memory ionDid,
         string memory recordId
-    ) public returns (uint256 tokenId) {
+    ) external returns (uint256 tokenId) {
         require(_domainToIds[domain].tokenId == 0, "Domain already registered");
         require(Verifier.verifyTx(proof, input), "Invalid proof");
 
         _tokenIdCounter += 1;
         _mint(msg.sender, _tokenIdCounter);
         
-        _domainToIds[domain] = DomainIDs(_tokenIdCounter, recordId);
+        _domainToIds[domain] = DomainInfo(_tokenIdCounter, ionDid, recordId);
         _tokenIdToDomain[_tokenIdCounter] = domain;
 
-        emit DomainUpdated(domain, _tokenIdCounter, recordId);
-        
+        emit DomainCreated(domain, _tokenIdCounter, ionDid, recordId);
+
         return _tokenIdCounter;
     }
 
-    /**
-     * @notice Updates the record ID associated with a token Id
-     * @param tokenId The ID of the token associated with the domain.
-     * @param newRecordId The new record ID to be associated with the token.
-     */
-    function updateRecordId(uint256 tokenId, string memory newRecordId) public {
-        require(ownerOf(tokenId) == msg.sender, "Only the token owner can update the recordId");
-
-        string memory domain = _tokenIdToDomain[tokenId];
-        _domainToIds[domain].recordId = newRecordId;
-
-        emit DomainUpdated(domain, tokenId, newRecordId);
-    }
 }

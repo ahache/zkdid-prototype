@@ -8,6 +8,8 @@ The proof + square are submitted to a verifier contract and if successful an NFT
 
 The domain string is the sha256 hash of the stringified proof + square result
 
+This domain resolves to the stored proof and the verification of the proof can attest to the owner knowing the original input number (the root of the stored square)
+
 ----
 
 ### Tech used
