@@ -193,8 +193,10 @@ function App() {
                         action={async () => {
                             if (!inputDomain) return;
                             const domainString = inputDomain.split('.')[0];
-                            const [, ionDid, recordId] = await zkdidContract.call("resolveAll", [domainString]);
-                            const storedString = await queryProofFromDWN(ionDid, recordId);
+                            // const [, ionDid, recordId] = await zkdidContract.call("resolveAll", [domainString]);
+                            const [,, recordId] = await zkdidContract.call("resolveAll", [domainString]);
+                            // const storedString = await queryProofFromDWN(ionDid, recordId);
+                            const storedString = await getProofFromDWN(recordId);
                             const proof = JSON.parse(storedString);
                             const eccPoints = proof[0];
                             const outputSquare = proof[1];
