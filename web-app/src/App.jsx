@@ -20,10 +20,26 @@ const buttonGrey = "#ededef";
 const Container = styled.div`
     position: relative;
 
+    .info-text {
+        width: 50%;
+        margin: 20px auto;
+
+        .subtitle {
+            font-size: 1.3em;
+            font-weight: 500;
+            padding-bottom: 5px;
+        }
+
+        .brief {
+
+        }
+    }
+
     .input-group {
         .entry-label {
             font-weight: 500;
             font-size: 1.1em;
+            padding-bottom: 5px;
         }
 
         input {
@@ -33,15 +49,13 @@ const Container = styled.div`
             border: ${buttonGrey} solid;
             background-color: white;
             color: black;
-        }
-
-        input.domain-input {
             width: 300px;
         }
     }
 
     .register-button {
-        margin-top: 30px;
+        margin-top: 10px;
+        margin-bottom: 30px;
     }
 
     .results {
@@ -67,7 +81,7 @@ const Container = styled.div`
 
     .divider {
         border: 1px ${buttonGrey} solid;
-        margin: 40px auto;
+        margin: 20px auto;
         width: 40%;
     }
 
@@ -97,7 +111,12 @@ function App() {
                 <img src={zkdidLogo} className="logo" alt="logo" />
             </div>
             <h1>ZKDID</h1>
+            <div className='divider'></div>
             {/* Registry */}
+            <div className='info-text'>
+                <div className='subtitle'>Registry</div>
+                <div className='brief'>Generate and publish (DWN) proof of squaring a number. Register domain (NFT) that resolves to this proof.</div>
+            </div>
             <div className='input-group'>
                 <div className='entry-label'>Enter a Number:</div>
                 <div>
@@ -148,6 +167,10 @@ function App() {
             </div>
             <div className='divider'></div>
             {/* Resolution */}
+            <div className='info-text'>
+                <div className='subtitle'>Resolver</div>
+                <div className='brief'>Domain will resolve to associated proof and assertion is verified on chain.</div>
+            </div>
             <div className='input-group'>
                 <div className='entry-label'>Enter Domain:</div>
                 <div>
