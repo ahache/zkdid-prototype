@@ -31,6 +31,8 @@ const Container = styled.div`
             font-size: 1em;
             border-radius: 5px;
             border: ${buttonGrey} solid;
+            background-color: white;
+            color: black;
         }
 
         input.domain-input {
