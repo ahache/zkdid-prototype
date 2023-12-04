@@ -10,7 +10,7 @@ export const writeProofToDWN = async proof => {
         }
     });
 
-    // await record.send(did);
+    await record.send(did);
 
     return { record, did };
 }
