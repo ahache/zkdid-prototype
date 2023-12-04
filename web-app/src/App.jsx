@@ -165,7 +165,7 @@ function App() {
                     {/* Error case here */}
                 </div>}
             </div>
-            <div>** If you see an Error, possible thirdweb wallet connection. Please clear cache & restart browser **</div>
+            <div>** If you see an Error, possible thirdweb connection. Please restart browser. Metamask (or other wallet) must be installed in browser. **</div>
             <div className='divider'></div>
             {/* Resolution */}
             <div className='info-text'>
