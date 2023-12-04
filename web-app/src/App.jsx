@@ -165,6 +165,7 @@ function App() {
                     {/* Error case here */}
                 </div>}
             </div>
+            <div>** If you see an Error, possible thirdweb wallet connection. Please clear cache & restart browser **</div>
             <div className='divider'></div>
             {/* Resolution */}
             <div className='info-text'>
